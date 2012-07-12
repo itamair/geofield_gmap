@@ -13,11 +13,13 @@ function geofield_gmap_center(mapid) {
 }
 
 function geofield_gmap_marker(mapid) {
+	
+	if (!window.confirm('Change marker position ?')) return;
 	google.maps.event.trigger(geofield_gmap_data[mapid].map, 'resize');
 	var position = geofield_gmap_data[mapid].map.getCenter();
 	geofield_gmap_data[mapid].marker.setPosition(position);
-	geofield_gmap_data[mapid].lat.val(Math.round(position.lat()*10000)/10000);
-	geofield_gmap_data[mapid].lng.val(Math.round(position.lng()*10000)/10000);
+	geofield_gmap_data[mapid].lat.val(position.lat());
+	geofield_gmap_data[mapid].lng.val(position.lng());
 	
 	if (geofield_gmap_data[mapid].search) {
 		geofield_gmap_geocoder.geocode({'latLng': position}, function(results, status) {
@@ -88,8 +90,8 @@ function geofield_gmap_initialize(params){
 	      },
 	      //This bit is executed upon selection of an address
 	      select: function(event, ui) {
-	    	jQuery("#" + params.latid).val(Math.round(ui.item.latitude*10000)/10000);
-	    	jQuery("#" + params.lngid).val(Math.round(ui.item.longitude*10000)/10000);
+	    	jQuery("#" + params.latid).val(ui.item.latitude);
+	    	jQuery("#" + params.lngid).val(ui.item.longitude);
 	        var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
 	        marker.setPosition(location);
 	        map.setCenter(location);
@@ -103,8 +105,8 @@ function geofield_gmap_initialize(params){
 	      if (status == google.maps.GeocoderStatus.OK) {
 	        if (results[0]) {
 	          jQuery('#' + params.searchid).val(results[0].formatted_address);
-	          jQuery("#" + params.latid).val(Math.round(marker.getPosition().lat()*10000)/10000);
-	          jQuery("#" + params.lngid).val(Math.round(marker.getPosition().lng()*10000)/10000);
+	          jQuery("#" + params.latid).val(marker.getPosition().lat());
+	          jQuery("#" + params.lngid).val(marker.getPosition().lng());
 	        }
 	      }
 	    });
