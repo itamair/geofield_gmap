@@ -1,0 +1,100 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function geofield_gmap_menu() {
+    $items['admin/config/content/geofield_gmap'] = array(
+    'title' => 'Geofield Gmap',
+    'description' => 'Settings for Geofield Gmap.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('geofield_gmap_admin_settings'),
+    'access arguments' => array('administer geofield_gmap'),
+    'file' => 'geofield_gmap.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function geofield_gmap_field_widget_info_alter(&$info) {
+  $info['geofield_gmap'] = array(
+      'label' => t('Google Map'),
+      'field types' => array('geofield'),
+      'settings' => array(),
+      'module' => 'geofield_gmap',
+  );
+}
+
+/**
+ * Implements hook_ini().
+ */
+function geofield_gmap_init() {
+  drupal_add_js('http://maps.google.com/maps/api/js?sensor=false', array(
+       'type' => 'external',
+       'preprocess' => FALSE,
+      ));
+}
+
+function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+  
+  if ($widget['type'] == 'geofield_gmap') {
+    
+    drupal_add_library('system', 'ui.autocomplete');
+    
+    $element = geofield_get_base_element($base, $items, $delta);
+    
+    $id = geofield_gmap_get_id($element);
+    $gmapid = 'gmap-' . $id;
+    
+    $element['lat']['#prefix'] = '<label>'.t("Geocode address").'</label><input size="64" id="search-'.$id.'" class="form-text form-autocomplete geofield-gmap-search" type="text"/>';
+    $element['lat']['#prefix'] .= '<div id="'.$gmapid.'" class="geofield-gmap-cnt"></div>';
+    $element['lat']['#prefix'] .= '<label>'.t("Drag the marker to narrow the location").'</label>';
+    $element['lat']['#prefix'] .= '<button class="geofield-gmap-center" onclick="geofield_gmap_center(\''.$gmapid.'\'); return false;">'.t('Find marker').'</button>';
+    $element['lat']['#prefix'] .= '<button class="geofield-gmap-marker" onclick="geofield_gmap_marker(\''.$gmapid.'\'); return false;">'.t('Place marker here').'</button>';
+    
+    $js = 'jQuery(document).ready(function() { geofield_gmap_initialize({';
+    $js .= 'lat: '.floatval($element['lat']['#default_value']).', ';
+    $js .= 'lng: '.floatval($element['lon']['#default_value']).', ';
+    $js .= 'latid: "edit-'.$id.'-lat", ';
+    $js .= 'lngid: "edit-'.$id.'-lon", ';
+    $js .= 'searchid: "search-'.$id.'", ';
+    $js .= 'mapid: "'.$gmapid.'", ';
+    $js .= 'widget: true, ';
+    $js .= '}); });';
+    
+    drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
+    $element['lat']['#title'] = 'Latitude';
+    $element['lat']['#type'] = 'textfield';
+
+    $element['lon']['#title'] = 'Longitude';
+    $element['lon']['#type'] = 'textfield';
+
+    $element['master_column']['#value'] = 'latlon';
+    
+  }
+
+  /*
+  if ($widget['type'] == 'geofield_openlayers') {
+    $openlayers_map_id = !empty($instance['widget']['settings']['openlayers_map']) ? $instance['widget']['settings']['openlayers_map'] : 'geofield_widget_map';
+    $element['#openlayers_mapname'] = $openlayers_map_id;
+    $element['#after_build']= array('geofield_widget_openlayers_afterbuild');
+  }
+  */
+
+  return $element;
+}
+
+function geofield_gmap_get_id($element, $type = 'id') {
+  switch($type) {
+    default:
+      return strtr($element['#field_name'] . '-' . $element['#language'] . '-' . $element['#delta'], '_', '-');
+  }
+}
