@@ -25,7 +25,11 @@ function geofield_gmap_field_widget_info_alter(&$info) {
   $info['geofield_gmap'] = array(
       'label' => t('Google Map'),
       'field types' => array('geofield'),
-      'settings' => array(),
+      'settings' => array(
+          'map_type' => 'ROADMAP',
+          'confirm_center_marker' => FALSE,
+          'click_to_place_marker' => FALSE,
+       ),
       'module' => 'geofield_gmap',
   );
 }
@@ -44,6 +48,9 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
   
   $widget = $instance['widget'];
   $settings = $widget['settings'];
+  if (!isset($settings['map_type'])) $settings['map_type'] = 'ROADMAP';
+  if (!isset($settings['confirm_center_marker'])) $settings['confirm_center_marker'] = FALSE;
+  if (!isset($settings['click_to_place_marker'])) $settings['click_to_place_marker'] = FALSE;
   
   if ($widget['type'] == 'geofield_gmap') {
     
@@ -68,6 +75,9 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     $js .= 'searchid: "search-'.$id.'", ';
     $js .= 'mapid: "'.$gmapid.'", ';
     $js .= 'widget: true, ';
+    $js .= 'map_type: "'.$settings['map_type'].'", ';
+    $js .= 'confirm_center_marker: '.($settings['confirm_center_marker']?'true':'false').', ';
+    $js .= 'click_to_place_marker: '.($settings['click_to_place_marker']?'true':'false').', ';
     $js .= '}); });';
     
     drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
@@ -81,14 +91,6 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     
   }
 
-  /*
-  if ($widget['type'] == 'geofield_openlayers') {
-    $openlayers_map_id = !empty($instance['widget']['settings']['openlayers_map']) ? $instance['widget']['settings']['openlayers_map'] : 'geofield_widget_map';
-    $element['#openlayers_mapname'] = $openlayers_map_id;
-    $element['#after_build']= array('geofield_widget_openlayers_afterbuild');
-  }
-  */
-
   return $element;
 }
 
@@ -97,4 +99,46 @@ function geofield_gmap_get_id($element, $type = 'id') {
     default:
       return strtr($element['#field_name'] . '-' . $element['#language'] . '-' . $element['#delta'], '_', '-');
   }
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function geofield_gmap_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+  if (!isset($settings['map_type'])) $settings['map_type'] = 'ROADMAP';
+  if (!isset($settings['confirm_center_marker'])) $settings['confirm_center_marker'] = FALSE;
+  if (!isset($settings['click_to_place_marker'])) $settings['click_to_place_marker'] = FALSE;
+
+  $form = array();
+
+  if ($widget['type'] == 'geofield_gmap') {
+
+    $form['map_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Map type'),
+        '#default_value' => $settings['map_type'],
+        '#options' => array(
+            'ROADMAP' => t('Roadmap'), 
+            'SATELITE' => t('Satelite'),
+            'HYBRID' => t('Hybrid'),
+            'TERRAIN' => t('Terrain'),
+           ),
+    );
+    
+    $form['confirm_center_marker'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Confirm center marker'),
+        '#default_value' => $settings['confirm_center_marker'],
+    );
+
+    $form['click_to_place_marker'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Click to place marker'),
+        '#default_value' => $settings['click_to_place_marker'],
+    );
+    
+  }
+  return $form;
 }
