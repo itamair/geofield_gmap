@@ -48,50 +48,79 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
   
   $widget = $instance['widget'];
   $settings = $widget['settings'];
-  if (!isset($settings['map_type'])) $settings['map_type'] = 'ROADMAP';
-  if (!isset($settings['confirm_center_marker'])) $settings['confirm_center_marker'] = FALSE;
-  if (!isset($settings['click_to_place_marker'])) $settings['click_to_place_marker'] = FALSE;
   
   if ($widget['type'] == 'geofield_gmap') {
+    if (!isset($settings['map_type'])) $settings['map_type'] = 'ROADMAP';
+    if (!isset($settings['confirm_center_marker'])) $settings['confirm_center_marker'] = FALSE;
+    if (!isset($settings['click_to_place_marker'])) $settings['click_to_place_marker'] = FALSE;
     
     drupal_add_library('system', 'ui.autocomplete');
     
     $element = geofield_get_base_element($base, $items, $delta);
     
-    $id = geofield_gmap_get_id($element);
-    $gmapid = 'gmap-' . $id;
-    
-    $element['lat']['#prefix'] = '<label>'.t("Geocode address").'</label><input size="64" id="search-'.$id.'" class="form-text form-autocomplete geofield-gmap-search" type="text"/>';
-    $element['lat']['#prefix'] .= '<div id="'.$gmapid.'" class="geofield-gmap-cnt"></div>';
-    $element['lat']['#prefix'] .= '<label>'.t("Drag the marker to narrow the location").'</label>';
-    $element['lat']['#prefix'] .= '<button class="geofield-gmap-center" onclick="geofield_gmap_center(\''.$gmapid.'\'); return false;">'.t('Find marker').'</button>';
-    $element['lat']['#prefix'] .= '<button class="geofield-gmap-marker" onclick="geofield_gmap_marker(\''.$gmapid.'\'); return false;">'.t('Place marker here').'</button>';
-    
-    $js = 'jQuery(document).ready(function() { geofield_gmap_initialize({';
-    $js .= 'lat: '.floatval($element['lat']['#default_value']).', ';
-    $js .= 'lng: '.floatval($element['lon']['#default_value']).', ';
-    $js .= 'latid: "edit-'.$id.'-lat", ';
-    $js .= 'lngid: "edit-'.$id.'-lon", ';
-    $js .= 'searchid: "search-'.$id.'", ';
-    $js .= 'mapid: "'.$gmapid.'", ';
-    $js .= 'widget: true, ';
-    $js .= 'map_type: "'.$settings['map_type'].'", ';
-    $js .= 'confirm_center_marker: '.($settings['confirm_center_marker']?'true':'false').', ';
-    $js .= 'click_to_place_marker: '.($settings['click_to_place_marker']?'true':'false').', ';
-    $js .= '}); });';
-    
-    drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
+    $element['#gmap_id'] = geofield_gmap_get_id($element);
+    $element['#gmap_map_type'] = $settings['map_type'];
+    $element['#gmap_confirm_center_marker'] = $settings['confirm_center_marker'];
+    $element['#gmap_click_to_place_marker'] = $settings['click_to_place_marker'];
+    $element['#after_build']= array('geofield_gmap_widget_gmap_afterbuild');
+
     $element['lat']['#title'] = 'Latitude';
     $element['lat']['#type'] = 'textfield';
-
+    
     $element['lon']['#title'] = 'Longitude';
     $element['lon']['#type'] = 'textfield';
-
+    
     $element['master_column']['#value'] = 'latlon';
     
   }
 
   return $element;
+}
+
+/**
+ * Callback for afterbuild for widget for js addition
+ */
+function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
+  $id = $element['#gmap_id'];
+  $gmapid = 'gmap-' . $id;
+
+  $element['lat']['#prefix'] = '<label>'.t("Geocode address").'</label><input size="64" id="search-'.$id.'" class="form-text form-autocomplete geofield-gmap-search" type="text"/>';
+  $element['lat']['#prefix'] .= '<div id="'.$gmapid.'" class="geofield-gmap-cnt"></div>';
+  $element['lat']['#prefix'] .= '<label>'.t("Drag the marker to narrow the location").'</label>';
+  $element['lat']['#prefix'] .= '<button class="geofield-gmap-center" onclick="geofield_gmap_center(\''.$gmapid.'\'); return false;">'.t('Find marker').'</button>';
+  $element['lat']['#prefix'] .= '<button class="geofield-gmap-marker" onclick="geofield_gmap_marker(\''.$gmapid.'\'); return false;">'.t('Place marker here').'</button>';
+  
+  $js = 'geofield_gmap_initialize({';
+  $js .= 'lat: '.floatval($element['lat']['#default_value']).', ';
+  $js .= 'lng: '.floatval($element['lon']['#default_value']).', ';
+  $js .= 'latid: "edit-'.$id.'-lat", ';
+  $js .= 'lngid: "edit-'.$id.'-lon", ';
+  $js .= 'searchid: "search-'.$id.'", ';
+  $js .= 'mapid: "'.$gmapid.'", ';
+  $js .= 'widget: true, ';
+  $js .= 'map_type: "'.$element['#gmap_map_type'].'", ';
+  $js .= 'confirm_center_marker: '.($element['#gmap_confirm_center_marker']?'true':'false').', ';
+  $js .= 'click_to_place_marker: '.($element['#gmap_click_to_place_marker']?'true':'false').', ';
+  $js .= '});';
+  
+  //$js = 'jQuery(document).ready(function() { ' . $js . ' });';
+  
+  // drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
+  // drupal_add_js does not work
+  
+  $element['#attached']['js']= array(
+        $js => array(
+          'type' => 'inline',
+          'scope' => 'footer',
+          'preprocess' => FALSE,
+        ),
+      );
+  
+  return $element;
+}
+
+function geofield_gmap_widget_gmap_ajax_callback($element, &$form_state) {
+  
 }
 
 function geofield_gmap_get_id($element, $type = 'id') {
