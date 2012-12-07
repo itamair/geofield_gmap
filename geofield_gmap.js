@@ -147,17 +147,17 @@ function geofield_gmap_initialize(params){
 		  });
 	  }
 	  
-	  onchange = function() {
-		  var location = new google.maps.LatLng(
-				  parseInt(geofield_gmap_data[params.mapid].lat.val()),
-				  parseInt(geofield_gmap_data[params.mapid].lng.val()));
-		  marker.setPosition(location);
-	      map.setCenter(location);
-	  };
-	  
-	  geofield_gmap_data[params.mapid].lat.change(onchange);
-	  geofield_gmap_data[params.mapid].lng.change(onchange);
-  }
+    geofield_onchange = function() {
+      var location = new google.maps.LatLng(
+        parseInt(geofield_gmap_data[params.mapid].lat.val()),
+        parseInt(geofield_gmap_data[params.mapid].lng.val()));
+        marker.setPosition(location);
+        map.setCenter(location);
+      };
+    
+      geofield_gmap_data[params.mapid].lat.change(geofield_onchange);
+      geofield_gmap_data[params.mapid].lng.change(geofield_onchange);
+    }
 }
 
 

@@ -44,6 +44,9 @@ function geofield_gmap_init() {
       ));
 }
 
+/**
+ * Implements hook_field_widget_form().
+ */
 function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   
   $widget = $instance['widget'];
@@ -170,4 +173,16 @@ function geofield_gmap_field_widget_settings_form($field, $instance) {
     
   }
   return $form;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function geofield_gmap_permission() {
+  return array(
+      'administer geofield_gmap' => array(
+          'title' => t('Administer Geofield Gmap'),
+          'description' => t('Administer Geofield Gmap.'),
+      ),
+  );
 }
