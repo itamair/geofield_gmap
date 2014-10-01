@@ -38,7 +38,7 @@ function geofield_gmap_field_widget_info_alter(&$info) {
  * Implements hook_init().
  */
 function geofield_gmap_init() {
-  drupal_add_js('http://maps.google.com/maps/api/js?sensor=false', array(
+  drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', array(
     'type' => 'external',
     'preprocess' => FALSE,
   ));
@@ -79,13 +79,14 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     $element['geom'] = array(
       '#type' => 'geofield_latlon',
       '#title' => check_plain($instance['label']),
-      '#description' => t($instance['description']),
+      '#description' => check_plain($instance['description']),
       '#default_value' => $latlon_value,
       '#required' => $instance['required'],
       '#geolocation' => (!empty($instance['widget']['settings']['html5_geolocation'])) ? $instance['widget']['settings']['html5_geolocation'] : FALSE,
     );
 
-    // $element['input_format'] is not a db field, but we use it determine how to parse/calculate values in our widget.
+    // $element['input_format'] is not a db field, but we use it determine how
+    // to parse/calculate values in our widget.
     $element['input_format'] = array(
       '#type' => 'value',
       '#attributes' => array('class' => array('geofield_input_format')),
@@ -106,7 +107,7 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
 }
 
 /**
- * Callback for afterbuild for widget for js addition
+ * Callback for afterbuild for widget for js addition.
  */
 function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $id = $element['#gmap_id'];
@@ -135,10 +136,9 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $js .= 'click_to_place_marker: ' . ($element['#gmap_click_to_place_marker'] ? 'true' : 'false') . ', ';
   $js .= '});';
 
-  //$js = 'jQuery(document).ready(function() { ' . $js . ' });';
+  // $js = 'jQuery(document).ready(function() { ' . $js . ' });';
   // drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
   // drupal_add_js does not work.
-
   $element['#attached']['js'] = array(
     $js => array(
       'type' => 'inline',
