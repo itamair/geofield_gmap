@@ -35,16 +35,6 @@ function geofield_gmap_field_widget_info_alter(&$info) {
 }
 
 /**
- * Implements hook_init().
- */
-function geofield_gmap_init() {
-  drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', array(
-    'type' => 'external',
-    'preprocess' => FALSE,
-  ));
-}
-
-/**
  * Implements hook_field_widget_form().
  */
 function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
@@ -82,7 +72,17 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
       '#description' => check_plain($instance['description']),
       '#default_value' => $latlon_value,
       '#required' => $instance['required'],
-      '#geolocation' => (!empty($instance['widget']['settings']['html5_geolocation'])) ? $instance['widget']['settings']['html5_geolocation'] : FALSE,
+      '#geolocation' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
+      '#geofield_gmap_geolocation_override' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
+      '#attached' => array(
+        'js' => array(
+          '//maps.googleapis.com/maps/api/js?sensor=false',
+          array(
+            'type' => 'external',
+            'preprocess' => FALSE,
+          ),
+        ),
+      ),
     );
 
     // $element['input_format'] is not a db field, but we use it determine how
@@ -110,6 +110,7 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
  * Callback for afterbuild for widget for js addition.
  */
 function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
+
   $id = $element['#gmap_id'];
   $gmapid = 'gmap-' . $id;
 
@@ -147,6 +148,13 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
     ),
   );
 
+  if (isset($element['geom']['#geofield_gmap_geolocation_override']) && $element['geom']['#geofield_gmap_geolocation_override']) {
+    // Add override behavior.
+    $element['geom']['#attached']['js'][] = drupal_get_path('module', 'geofield_gmap') . '/geofield_gmap_geolocation_override.js';
+    // Add the map id setting.
+    drupal_add_js(array('geofield_gmap' => array('mapid' => $gmapid)), 'setting');
+  }
+
   return $element;
 }
 
@@ -176,6 +184,9 @@ function geofield_gmap_field_widget_settings_form($field, $instance) {
   if (!isset($settings['click_to_place_marker'])) {
     $settings['click_to_place_marker'] = FALSE;
   }
+  if (!isset($settings['html5_geolocation'])) {
+    $settings['html5_geolocation'] = FALSE;
+  }
 
   $form = array();
 
@@ -203,6 +214,11 @@ function geofield_gmap_field_widget_settings_form($field, $instance) {
       '#type' => 'checkbox',
       '#title' => t('Click to place marker'),
       '#default_value' => $settings['click_to_place_marker'],
+    );
+    $form['html5_geolocation'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('HTML5 geolocation'),
+      '#default_value' => $settings['html5_geolocation'],
     );
 
   }
