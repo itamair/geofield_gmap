@@ -13,7 +13,6 @@ function geofield_gmap_center(mapid) {
 }
 
 function geofield_gmap_marker(mapid) {
-
   if (geofield_gmap_data[mapid].confirm_center_marker) {
     if (!window.confirm('Change marker position ?')) return;
   }
@@ -74,7 +73,7 @@ function geofield_gmap_initialize(params) {
   var map = new google.maps.Map(document.getElementById(params.mapid), options);
   geofield_gmap_data[params.mapid].map = map;
 
-  // fix http://code.google.com/p/gmaps-api-issues/issues/detail?id=1448
+  // Fix http://code.google.com/p/gmaps-api-issues/issues/detail?id=1448.
   google.maps.event.addListener(map, "idle", function () {
     google.maps.event.trigger(map, 'resize');
   });
@@ -139,7 +138,6 @@ function geofield_gmap_initialize(params) {
         geofield_gmap_data[params.mapid].lng.val(position.lng());
         //google.maps.event.trigger(geofield_gmap_data[params.mapid].map, 'resize');
       });
-
     }
 
     geofield_onchange = function () {

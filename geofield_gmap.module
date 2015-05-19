@@ -87,7 +87,7 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
       '#required' => $instance['required'],
       '#geolocation' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
       '#geofield_gmap_geolocation_override' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
-      '#zoom_level' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : FALSE,
+      '#zoom_level' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : 1,
     );
 
     // $element['input_format'] is not a db field, but we use it determine how
