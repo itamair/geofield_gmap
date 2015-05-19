@@ -98,7 +98,6 @@ function geofield_gmap_initialize(params) {
     draggable: params.widget
   });
   geofield_gmap_data[params.mapid].marker = marker;
-
   marker.setPosition(location);
 
   if (params.widget && params.latid && params.lngid) {
@@ -127,6 +126,27 @@ function geofield_gmap_initialize(params) {
           var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
           marker.setPosition(location);
           map.setCenter(location);
+        }
+      });
+
+      // Geocode user input on enter.
+      geofield_gmap_data[params.mapid].search.keydown(function (e) {
+        if (e.which == 13) {
+          var input = geofield_gmap_data[params.mapid].search.val();
+          // Execute the geocoder
+          geofield_gmap_geocoder.geocode({'address': input }, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+              if (results[0]) {
+                // Set the location
+                var location = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                marker.setPosition(location);
+                map.setCenter(location);
+                // Fill the lat/lon fields with the new info
+                geofield_gmap_data[params.mapid].lat.val(marker.getPosition().lat());
+                geofield_gmap_data[params.mapid].lng.val(marker.getPosition().lng());
+              }
+            }
+          })
         }
       });
 
