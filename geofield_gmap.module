@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @file
+ * Google Map widget for geofield. For now allow to use a
+ * google map v3 map to input a location. A quick text
+ * input + geocode allow you to specify an address.
+ * You can drag and drop the marker to narrow the position.
+ */
 
 /**
  * Implements hook_menu().
@@ -98,6 +105,7 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     $element['#gmap_confirm_center_marker'] = $settings['confirm_center_marker'];
     $element['#gmap_click_to_place_marker'] = $settings['click_to_place_marker'];
     $element['#after_build'] = array('geofield_gmap_widget_gmap_afterbuild');
+
   }
 
   return $element;
@@ -162,15 +170,11 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   return $element;
 }
 
-function geofield_gmap_widget_gmap_ajax_callback($element, &$form_state) {
-
-}
-
+/**
+ * Helper function: Generate a unique id for the map element.
+ */
 function geofield_gmap_get_id($element, $type = 'id') {
-  switch ($type) {
-    default:
-      return strtr($element['#field_name'] . '-' . $element['#language'] . '-' . $element['#delta'], '_', '-');
-  }
+  return strtr($element['#field_name'] . '-' . $element['#language'] . '-' . $element['#delta'], '_', '-');
 }
 
 /**
