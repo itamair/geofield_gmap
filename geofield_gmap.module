@@ -54,8 +54,6 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
       $settings['click_to_place_marker'] = FALSE;
     }
 
-    drupal_add_library('system', 'ui.autocomplete');
-
     $latlon_value = array(
       'lat' => '',
       'lon' => '',
@@ -100,12 +98,6 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     $element['#gmap_confirm_center_marker'] = $settings['confirm_center_marker'];
     $element['#gmap_click_to_place_marker'] = $settings['click_to_place_marker'];
     $element['#after_build'] = array('geofield_gmap_widget_gmap_afterbuild');
-
-    drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', array(
-      'type' => 'external',
-      'preprocess' => FALSE,
-    ));
-
   }
 
   return $element;
@@ -153,6 +145,12 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
       'preprocess' => FALSE,
     ),
   );
+
+  drupal_add_library('system', 'ui.autocomplete');
+  drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', array(
+    'type' => 'external',
+    '  preprocess' => FALSE,
+  ));
 
   if (isset($element['geom']['#geofield_gmap_geolocation_override']) && $element['geom']['#geofield_gmap_geolocation_override']) {
     // Add override behavior.
