@@ -78,6 +78,21 @@ function geofield_gmap_initialize(params) {
     google.maps.event.trigger(map, 'resize');
   });
 
+  // Fix map issue in fieldgroups / vertical tabs
+  // https://www.drupal.org/node/2474867.
+  google.maps.event.addListenerOnce(map, "idle", function () {
+    // Show all map tiles when a map is shown in a vertical tab.
+    jQuery('#' + params.mapid).closest('div.vertical-tabs').find('.vertical-tab-button a').click(function () {
+      google.maps.event.trigger(map, 'resize');
+      geofield_gmap_center(params.mapid);
+    });
+    // Show all map tiles when a map is shown in a collapsible fieldset.
+    jQuery('#' + params.mapid).closest('fieldset.collapsible').find('a.fieldset-title').click(function () {
+      google.maps.event.trigger(map, 'resize');
+      geofield_gmap_center(params.mapid);
+    });
+  });
+
   var marker = new google.maps.Marker({
     map: map,
     draggable: params.widget
