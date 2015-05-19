@@ -58,8 +58,8 @@ function geofield_gmap_initialize(params){
 	  case "ROADMAP":
 		  options.mapTypeId = google.maps.MapTypeId.ROADMAP;
 		  break;
-	  case "SATELITE":
-		  options.mapTypeId = google.maps.MapTypeId.SATELITE;
+	  case "SATELLITE":
+		  options.mapTypeId = google.maps.MapTypeId.SATELLITE;
 		  break;
 	  case "HYBRID":
 		  options.mapTypeId = google.maps.MapTypeId.HYBRID;
