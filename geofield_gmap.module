@@ -105,7 +105,6 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     $element['#gmap_confirm_center_marker'] = $settings['confirm_center_marker'];
     $element['#gmap_click_to_place_marker'] = $settings['click_to_place_marker'];
     $element['#after_build'] = array('geofield_gmap_widget_gmap_afterbuild');
-
   }
 
   return $element;
@@ -143,28 +142,32 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $js .= 'click_to_place_marker: ' . ($element['#gmap_click_to_place_marker'] ? 'true' : 'false') . ', ';
   $js .= '});';
 
-  // $js = 'jQuery(document).ready(function() { ' . $js . ' });';
-  // drupal_add_js($js, array('type' => 'inline', 'scope'=>'footer'));
-  // drupal_add_js does not work.
-  $element['#attached']['js'] = array(
-    $js => array(
-      'type' => 'inline',
-      'scope' => 'footer',
-      'preprocess' => FALSE,
-    ),
+  // Attach inline JS, GMAP API and autocomplete library.
+  $element['#attached']['js'][] = array(
+    'data' => $js,
+    'type' => 'inline',
+    'scope' => 'footer',
+    'preprocess' => FALSE,
   );
-
-  drupal_add_library('system', 'ui.autocomplete');
-  drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', array(
+  $element['#attached']['library'][] = array('system', 'ui.autocomplete');
+  $element['#attached']['js'][] = array(
+    'data' => '//maps.googleapis.com/maps/api/js?sensor=false',
     'type' => 'external',
-    '  preprocess' => FALSE,
-  ));
+    'preprocess' => FALSE,
+  );
 
   if (isset($element['geom']['#geofield_gmap_geolocation_override']) && $element['geom']['#geofield_gmap_geolocation_override']) {
     // Add override behavior.
     $element['geom']['#attached']['js'][] = drupal_get_path('module', 'geofield_gmap') . '/geofield_gmap_geolocation_override.js';
     // Add the map id setting.
-    drupal_add_js(array('geofield_gmap' => array('mapid' => $gmapid)), 'setting');
+    $element['#attached']['js'][] = array(
+      'data' => array(
+        'geofield_gmap' => array(
+          'mapid' => $gmapid,
+        ),
+      ),
+      'type' => 'setting',
+    );
   }
 
   return $element;
@@ -214,7 +217,7 @@ function geofield_gmap_field_widget_settings_form($field, $instance) {
     $form['zoom_level'] = array(
       '#type' => 'textfield',
       '#title' => t('Default zoom level'),
-      '#default_value' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : 12,
+      '#default_value' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : 1,
       '#required' => FALSE,
     );
     $form['confirm_center_marker'] = array(
