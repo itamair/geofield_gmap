@@ -66,6 +66,14 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     if (isset($items[$delta]['lon'])) {
       $latlon_value['lon'] = floatval($items[$delta]['lon']);
     }
+    // If we still have empty lat and long, use the field's default values.
+    if (!$latlon_value['lat'] || !$latlon_value['lon']) {
+      if ($default_field_value = field_get_default_value($base['#entity_type'], $base['#bundle'], $field, $instance, $langcode)) {
+        if ($default_geom_value = $default_field_value[0]['geom']) {
+          $latlon_value = $default_geom_value;
+        }
+      }
+    }
     $element['geom'] = array(
       '#type' => 'geofield_latlon',
       '#title' => check_plain($instance['label']),
@@ -74,6 +82,7 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
       '#required' => $instance['required'],
       '#geolocation' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
       '#geofield_gmap_geolocation_override' => (!empty($settings['html5_geolocation'])) ? $settings['html5_geolocation'] : FALSE,
+      '#zoom_level' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : FALSE,
     );
 
     // $element['input_format'] is not a db field, but we use it determine how
@@ -123,6 +132,7 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $js = 'geofield_gmap_initialize({';
   $js .= 'lat: ' . floatval($element['geom']['lat']['#default_value']) . ', ';
   $js .= 'lng: ' . floatval($element['geom']['lon']['#default_value']) . ', ';
+  $js .= 'zoom: "' . $element['geom']['#zoom_level'] . '", ';
   $js .= 'latid: "' . $element['geom']['lat']['#id'] . '", ';
   $js .= 'lngid: "' . $element['geom']['lon']['#id'] . '", ';
   $js .= 'searchid: "search-' . $id . '", ';
@@ -199,13 +209,17 @@ function geofield_gmap_field_widget_settings_form($field, $instance) {
         'TERRAIN' => t('Terrain'),
       ),
     );
-
+    $form['zoom_level'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Default zoom level'),
+      '#default_value' => (!empty($settings['zoom_level'])) ? $settings['zoom_level'] : 12,
+      '#required' => FALSE,
+    );
     $form['confirm_center_marker'] = array(
       '#type' => 'checkbox',
       '#title' => t('Confirm center marker'),
       '#default_value' => $settings['confirm_center_marker'],
     );
-
     $form['click_to_place_marker'] = array(
       '#type' => 'checkbox',
       '#title' => t('Click to place marker'),
