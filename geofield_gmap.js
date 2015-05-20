@@ -1,17 +1,40 @@
-// Useful links:
-// http://code.google.com/apis/maps/documentation/javascript/reference.html#Marker
-// http://code.google.com/apis/maps/documentation/javascript/services.html#Geocoding
-// http://jqueryui.com/demos/autocomplete/#remote-with-cache
+;(function ($) {
+  Drupal.behaviors.geofieldMapInit = {
+    attach: function (context, settings) {
 
+      // Init all maps in Drupal.settings.
+      if (settings.geofield_gmap) {
+        $.each(settings.geofield_gmap, function(mapid, options) {
+          geofield_gmap_initialize({
+            lat: options.lat,
+            lng: options.lng,
+            zoom: options.zoom,
+            latid: options.latid,
+            lngid: options.lngid,
+            searchid: options.searchid,
+            mapid: options.mapid,
+            widget: options.widget,
+            map_type: options.map_type,
+            confirm_center_marker: options.confirm_center_marker,
+            click_to_place_marker: options.click_to_place_marker,
+          });
+        });
+      }
+
+    }
+  };
+})(jQuery);
 
 var geofield_gmap_geocoder;
 var geofield_gmap_data = [];
 
+// Center the map to the marker location.
 function geofield_gmap_center(mapid) {
   google.maps.event.trigger(geofield_gmap_data[mapid].map, 'resize');
   geofield_gmap_data[mapid].map.setCenter(geofield_gmap_data[mapid].marker.getPosition());
 }
 
+// Place marker at the current center of the map.
 function geofield_gmap_marker(mapid) {
   if (geofield_gmap_data[mapid].confirm_center_marker) {
     if (!window.confirm('Change marker position ?')) return;
@@ -34,6 +57,7 @@ function geofield_gmap_marker(mapid) {
   }
 }
 
+// Init google map.
 function geofield_gmap_initialize(params) {
   geofield_gmap_data[params.mapid] = params;
   jQuery.noConflict();
@@ -93,6 +117,7 @@ function geofield_gmap_initialize(params) {
     });
   });
 
+  // Place map marker.
   var marker = new google.maps.Marker({
     map: map,
     draggable: params.widget

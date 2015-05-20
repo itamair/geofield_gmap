@@ -71,6 +71,10 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
     if (isset($items[$delta]['lon'])) {
       $latlon_value['lon'] = floatval($items[$delta]['lon']);
     }
+    // Try to fetch data from form state if lon/lat is empty.
+    if (isset($form_state['input'][$field['field_name']][$langcode][$delta]['geom'])) {
+      $latlon_value = $form_state['input'][$field['field_name']][$langcode][$delta]['geom'];
+    }
     // If we still have empty lat and long, use the field's default values.
     if (!$latlon_value['lat'] || !$latlon_value['lon']) {
       if ($default_field_value = field_get_default_value($base['#entity_type'], $base['#bundle'], $field, $instance, $langcode)) {
@@ -115,9 +119,16 @@ function geofield_gmap_field_widget_form(&$form, &$form_state, $field, $instance
  */
 function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
 
+  // Attach GMAP API and autocomplete library.
+  $element['#attached']['library'][] = array('system', 'ui.autocomplete');
+  $element['#attached']['js'][] = array(
+    'data' => '//maps.googleapis.com/maps/api/js?sensor=false',
+    'type' => 'external',
+    'preprocess' => FALSE,
+  );
+
   $id = $element['#gmap_id'];
   $gmapid = 'gmap-' . $id;
-
   $element['geom']['lat']['#prefix'] = '<div class="form-item">';
   $element['geom']['lat']['#prefix'] .= '<label>' . t("Geocode address") . '</label><input size="64" id="search-' . $id . '" class="form-text form-autocomplete geofield-gmap-search" type="text"/>';
   $element['geom']['lat']['#prefix'] .= '<div id="' . $gmapid . '" class="geofield-gmap-cnt"></div>';
@@ -128,46 +139,28 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $element['geom']['lat']['#prefix'] .= '</div>';
   $element['geom']['lat']['#prefix'] .= '</div>';
 
-  $js = 'geofield_gmap_initialize({';
-  $js .= 'lat: ' . floatval($element['geom']['lat']['#default_value']) . ', ';
-  $js .= 'lng: ' . floatval($element['geom']['lon']['#default_value']) . ', ';
-  $js .= 'zoom: "' . $element['geom']['#zoom_level'] . '", ';
-  $js .= 'latid: "' . $element['geom']['lat']['#id'] . '", ';
-  $js .= 'lngid: "' . $element['geom']['lon']['#id'] . '", ';
-  $js .= 'searchid: "search-' . $id . '", ';
-  $js .= 'mapid: "' . $gmapid . '", ';
-  $js .= 'widget: true, ';
-  $js .= 'map_type: "' . $element['#gmap_map_type'] . '", ';
-  $js .= 'confirm_center_marker: ' . ($element['#gmap_confirm_center_marker'] ? 'true' : 'false') . ', ';
-  $js .= 'click_to_place_marker: ' . ($element['#gmap_click_to_place_marker'] ? 'true' : 'false') . ', ';
-  $js .= '});';
-
-  // Attach inline JS, GMAP API and autocomplete library.
-  $element['#attached']['js'][] = array(
-    'data' => $js,
-    'type' => 'inline',
-    'scope' => 'footer',
-    'preprocess' => FALSE,
-  );
-  $element['#attached']['library'][] = array('system', 'ui.autocomplete');
-  $element['#attached']['js'][] = array(
-    'data' => '//maps.googleapis.com/maps/api/js?sensor=false',
-    'type' => 'external',
-    'preprocess' => FALSE,
-  );
+  // Attach JS settings.
+  drupal_add_js(array(
+    'geofield_gmap' => array(
+      $gmapid => array(
+        'lat' => floatval($element['geom']['lat']['#default_value']),
+        'lng' => floatval($element['geom']['lon']['#default_value']),
+        'zoom' => $element['geom']['#zoom_level'],
+        'latid' => $element['geom']['lat']['#id'],
+        'lngid' => $element['geom']['lon']['#id'],
+        'searchid' => 'search-' . $id,
+        'mapid' => $gmapid,
+        'widget' => TRUE,
+        'map_type' => $element['#gmap_map_type'],
+        'confirm_center_marker' => ($element['#gmap_confirm_center_marker'] ? 'true' : 'false'),
+        'click_to_place_marker' => ($element['#gmap_click_to_place_marker'] ? 'true' : 'false'),
+      ),
+    ),
+  ), 'setting');
 
   if (isset($element['geom']['#geofield_gmap_geolocation_override']) && $element['geom']['#geofield_gmap_geolocation_override']) {
     // Add override behavior.
-    $element['geom']['#attached']['js'][] = drupal_get_path('module', 'geofield_gmap') . '/geofield_gmap_geolocation_override.js';
-    // Add the map id setting.
-    $element['#attached']['js'][] = array(
-      'data' => array(
-        'geofield_gmap' => array(
-          'mapid' => $gmapid,
-        ),
-      ),
-      'type' => 'setting',
-    );
+    $element['#attached']['js'][] = drupal_get_path('module', 'geofield_gmap') . '/geofield_gmap_geolocation_override.js';
   }
 
   return $element;
