@@ -170,7 +170,12 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
  * Helper function: Generate a unique id for the map element.
  */
 function geofield_gmap_get_id($element, $type = 'id') {
-  return strtr($element['#field_name'] . '-' . $element['#language'] . '-' . $element['#delta'], '_', '-');
+  $id = array_merge($element['#field_parents'], array(
+    $element['#field_name'],
+    $element['#language'],
+    $element['#delta'],
+  ));
+  return strtr(implode('-', $id), '_', '-');
 }
 
 /**
