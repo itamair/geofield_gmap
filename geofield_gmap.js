@@ -1,4 +1,4 @@
-;(function ($) {
+(function ($) {
   Drupal.behaviors.geofieldMapInit = {
     attach: function (context, settings) {
 
@@ -140,9 +140,9 @@ function geofield_gmap_initialize(params) {
                 value: item.formatted_address,
                 latitude: item.geometry.location.lat(),
                 longitude: item.geometry.location.lng()
-              }
+              };
             }));
-          })
+          });
         },
         // This bit is executed upon selection of an address.
         select: function (event, ui) {
@@ -171,7 +171,7 @@ function geofield_gmap_initialize(params) {
                 geofield_gmap_data[params.mapid].lng.val(marker.getPosition().lng());
               }
             }
-          })
+          });
         }
       });
 

@@ -140,8 +140,8 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
   $element['geom']['lat']['#prefix'] .= '</div>';
 
   // Attach JS settings.
-  drupal_add_js(array(
-    'geofield_gmap' => array(
+  $element['#attached']['js'][] = array(
+    'data' => array('geofield_gmap' => array(
       $gmapid => array(
         'lat' => floatval($element['geom']['lat']['#default_value']),
         'lng' => floatval($element['geom']['lon']['#default_value']),
@@ -155,8 +155,9 @@ function geofield_gmap_widget_gmap_afterbuild($element, &$form_state) {
         'confirm_center_marker' => ($element['#gmap_confirm_center_marker'] ? 'true' : 'false'),
         'click_to_place_marker' => ($element['#gmap_click_to_place_marker'] ? 'true' : 'false'),
       ),
-    ),
-  ), 'setting');
+    )),
+    'type' => 'setting',
+  );
 
   if (isset($element['geom']['#geofield_gmap_geolocation_override']) && $element['geom']['#geofield_gmap_geolocation_override']) {
     // Add override behavior.
