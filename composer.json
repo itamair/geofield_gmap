@@ -1,0 +1,26 @@
+{
+  "name": "drupal/geofield_gmap",
+  "type": "drupal-module",
+  "description": "Geofield Gmap module provides a Google Map widget for Geofield Module.",
+  "homepage": "https://www.drupal.org/project/geofield_gmap",
+  "license": "GPL-2.0+",
+  "keywords": ["Drupal 8", "Geofield", "Google Maps"],
+  "support": {
+    "issues": "http://drupal.org/project/issues/geofield_gmap",
+    "source": "http://cgit.drupalcode.org/geofield_gmap"
+  },
+  "authors": [
+    {
+      "name": "Sean Blommaert",
+      "email": "s.p.blommaert@gmail.com"
+    },
+    {
+      "name": "Italo Mairo",
+      "email": "itamair@me.com"
+    },
+    {
+      "name": "quazardous",
+      "email": "berlioz@nicematin.fr"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+google_maps:
+  js:
+    //maps.googleapis.com/maps/api/js?sensor=false: {}
+
+leaflet:
+  remote: http://leaflet.cloudmade.com
+  version: 0.7.3
+  license:
+    name: Leaflet-License
+    url: https://github.com/Leaflet/Leaflet/blob/v0.7.3/LICENSE
+    gpl-compatible: true
+  js:
+    //cdn.leafletjs.com/leaflet-0.7.3/leaflet.js: {}
+  css:
+    component:
+      //cdn.leafletjs.com/leaflet-0.7.3/leaflet.css: {}
+
+geofield_gmap:
+  version: 1.x
+  css:
+    component:
+      css/geofield_gmap.css: {}
+  js:
+    js/geofield_gmap.js: {}
+  dependencies:
+      - core/jquery
+      - core/jquery.once
+      - core/drupal
+      - core/drupalSettings
+      - core/drupal.autocomplete
+
+geolocation:
+  version: 1.x
+  js:
+    js/geolocation.js: {}
+  dependencies:
+      - geofield_gmap/geofield_gmap

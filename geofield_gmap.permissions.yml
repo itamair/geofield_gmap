@@ -1,0 +1,3 @@
+administer geofield_gmap:
+  title: 'Administer Geofield GMap'
+  description: 'Administer settings of the Google Map widget and formatter for Geofield.'
