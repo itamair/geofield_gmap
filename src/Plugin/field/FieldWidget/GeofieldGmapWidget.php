@@ -6,7 +6,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\geofield\Plugin\Field\FieldWidget\GeofieldLatLonWidget;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,15 +22,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactoryPluginInterface {
-
-  use StringTranslationTrait;
-
-  /**
-   * The Translation service.
-   *
-   * @var \Drupal\Core\StringTranslation\TranslationInterface
-   */
-  protected $stringTranslation;
 
   /**
    * Lat Lon widget components.
@@ -149,26 +139,11 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#markup' => $this->t('Click to place marker: @state', array('@state' => $this->getSetting('click_to_place_marker') ? t('enabled') : t('disabled'))),
     ];
 
-    $geoaddress_field_field = [
-      '#markup' => $this->t('Geoaddress Field: @state', array('@state' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->getSetting('geoaddress_field')['field'] : $this->t('- any -'))),
-    ];
-
-    $geoaddress_field_hidden = [
-      '#markup' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->t('Geoaddress Field Hidden: @state', array('@state' => $this->getSetting('geoaddress_field')['hidden'])) : '',
-    ];
-
-    $geoaddress_field_disabled = [
-      '#markup' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->t('Geoaddress Field Disabled: @state', array('@state' => $this->getSetting('geoaddress_field')['disabled'])) : '',
-    ];
-
     $container = [
       'html5' => $html5,
       'map_zoom_level' => $map_zoom_level,
       'map_center' => $map_center,
       'marker_center' => $marker_center,
-      'field' => $geoaddress_field_field,
-      'hidden' => $geoaddress_field_hidden,
-      'disabled' => $geoaddress_field_disabled,
     ];
 
     return $container;
