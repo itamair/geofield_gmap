@@ -152,10 +152,10 @@ class GeofieldGmap extends GeofieldElementBase {
         'mapid' => $gmapid,
         'widget' => TRUE,
         'map_type' => $element['#map_type'],
-        'click_to_find_marker_id' => $element['gmap']['actions']['click_to_find_marker']['#attributes']['id'],
-        'click_to_find_marker' => ($element['#click_to_find_marker'] ? TRUE : FALSE),
-        'click_to_place_marker_id' => $element['gmap']['actions']['click_to_place_marker']['#attributes']['id'],
-        'click_to_place_marker' => ($element['#click_to_place_marker'] ? TRUE : FALSE),
+        'click_to_find_marker_id' => $element['#click_to_find_marker'] ? $element['map']['actions']['click_to_find_marker']['#attributes']['id'] : NULL,
+        'click_to_find_marker' => $element['#click_to_find_marker'] ? TRUE : FALSE,
+        'click_to_place_marker_id' => $element['#click_to_place_marker'] ? $element['map']['actions']['click_to_place_marker']['#attributes']['id'] : NULL,
+        'click_to_place_marker' => $element['#click_to_place_marker'] ? TRUE : FALSE,
       ],
     ];
 
