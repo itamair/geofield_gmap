@@ -184,7 +184,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       foreach ($this->components as $component) {
         if (empty($value['value'][$component]) || !is_numeric($value['value'][$component])) {
           $values[$delta]['value'] = '';
-          continue 2;
+          continue;
         }
       }
       $components = $value['value'];
