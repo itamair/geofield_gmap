@@ -1,31 +1,35 @@
 (function ($, Drupal, drupalSettings) {
 
+  'use strict';
+
   Drupal.behaviors.geofieldMapInit = {
-    attach: function (context, drupalSettings) {
+    attach: function (context) {
 
       // Init all maps in drupalSettings.
       if (drupalSettings['geofield_gmap']) {
         $.each(drupalSettings['geofield_gmap'], function(mapid, options) {
-          Drupal.geofieldMap.map_initialize({
-            lat: options.lat,
-            lng: options.lng,
-            zoom: options.zoom,
-            latid: options.latid,
-            lngid: options.lngid,
-            searchid: options.searchid,
-            mapid: options.mapid,
-            widget: options.widget,
-            map_type: options.map_type,
-            click_to_find_marker_id: options.click_to_find_marker_id,
-            click_to_find_marker: options.click_to_find_marker,
-            click_to_place_marker_id: options.click_to_place_marker_id,
-            click_to_place_marker: options.click_to_place_marker
+          // First load the library from google.
+          Drupal.geofieldMap.loadGoogle(function () {
+            //Then initialize it with the Geofield Gmap Settings.
+            Drupal.geofieldMap.map_initialize({
+              lat: options.lat,
+              lng: options.lng,
+              zoom: options.zoom,
+              latid: options.latid,
+              lngid: options.lngid,
+              searchid: options.searchid,
+              mapid: options.mapid,
+              widget: options.widget,
+              map_type: options.map_type,
+              click_to_find_marker_id: options.click_to_find_marker_id,
+              click_to_find_marker: options.click_to_find_marker,
+              click_to_place_marker_id: options.click_to_place_marker_id,
+              click_to_place_marker: options.click_to_place_marker
+            });
           });
         });
 
       }
-
-
 
     }
   };
@@ -34,6 +38,43 @@
 
     geocoder: null,
     map_data: {},
+
+    // Google Maps are loaded lazily. In some situations load_google() is called twice, which results in
+    // "You have included the Google Maps API multiple times on this page. This may cause unexpected errors." errors.
+    // This flag will prevent repeat $.getScript() calls.
+    maps_api_loading: false,
+
+    // Lead Google Maps library.
+    loadGoogle: function () {
+
+      // Check for google maps.
+      if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        if (Drupal.geofieldMap.maps_api_loading === true) {
+          return;
+        }
+
+        Drupal.geofieldMap.maps_api_loading = true;
+        // Google maps isn't loaded so lazy load google maps.
+
+        // Default script path.
+        var scriptPath = '//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false';
+
+        // If a Google API key is set, use it.
+        if (typeof drupalSettings['geofield_gmap']['gmap_api_key'] !== 'undefined') {
+          scriptPath += '&key=' + drupalSettings['geofield_gmap']['gmap_api_key'];
+        }
+
+        $.getScript(scriptPath)
+          .done(function () {
+            Drupal.geofieldMap.maps_api_loading = false;
+          });
+
+      }
+      else {
+        // Google maps loaded. Run callback.
+        Drupal.geolocation.googleCallback();
+      }
+    },
 
     // Center the map to the marker location.
     find_marker: function (mapid) {
@@ -66,12 +107,14 @@
       }
     },
 
+    // On Update Marker Event.
     geofields_update: function (mapid, position) {
       var self = this;
       self.lat_lon_fields_update(mapid, position);
       self.reverse_geocode(mapid, position);
     },
 
+    // On Change Marker Event.
     geofield_onchange: function (mapid) {
       var self = this;
       var location = new google.maps.LatLng(
@@ -89,6 +132,7 @@
       self.map_data[mapid].lng.val(position.lng().toFixed(6));
     },
 
+    // Process a Reverse Geocode.
     reverse_geocode: function (mapid, position) {
       var self = this;
       self.geocoder.geocode({'latLng': position}, function (results, status) {

@@ -1,7 +1,7 @@
 (function($, Drupal){
 
   Drupal.behaviors.geofieldMapGeolocation = {
-    attach: function (context, settings) {
+    attach: function (context) {
 
       // Don't do anything if we're on field configuration
       if (!$(context).find("#edit-instance").length) {

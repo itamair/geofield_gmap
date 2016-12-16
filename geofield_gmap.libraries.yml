@@ -1,6 +1,11 @@
 google_maps:
+  remote: "https://maps.googleapis.com/maps/api/js"
+  version: 1.x
+  license:
+    name: APACHE
+    gpl-compatible: true
   js:
-    //maps.googleapis.com/maps/api/js?sensor=false: {}
+    //maps.googleapis.com/maps/api/js: { type: external }
 
 leaflet:
   remote: http://leaflet.cloudmade.com
