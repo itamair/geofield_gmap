@@ -2,16 +2,16 @@
 
   'use strict';
 
-  Drupal.behaviors.geofieldMapInit = {
+  Drupal.behaviors.geofieldGmapInit = {
     attach: function (context) {
 
       // Init all maps in drupalSettings.
       if (drupalSettings['geofield_gmap']) {
         $.each(drupalSettings['geofield_gmap'], function(mapid, options) {
           // First load the library from google.
-          Drupal.geofieldMap.loadGoogle(mapid, function () {
+          Drupal.geofieldGmap.loadGoogle(mapid, function () {
             //Then initialize it with the Geofield Gmap Settings.
-            Drupal.geofieldMap.map_initialize({
+            Drupal.geofieldGmap.map_initialize({
               lat: options.lat,
               lng: options.lng,
               zoom: options.zoom,
@@ -34,7 +34,7 @@
     }
   };
 
-  Drupal.geofieldMap = {
+  Drupal.geofieldGmap = {
 
     geocoder: null,
     map_data: {},
@@ -48,13 +48,15 @@
      * Provides the callback that is called when maps loads.
      */
     googleCallback: function () {
+      var self = this;
+
       // Ensure callbacks array;
-      Drupal.geofieldMap.googleCallbacks = Drupal.geofieldMap.googleCallbacks || [];
+      self.googleCallbacks = self.googleCallbacks || [];
 
       // Wait until the window load event to try to use the maps library.
       $(document).ready(function (e) {
-        _.invoke(Drupal.geofieldMap.googleCallbacks, 'callback');
-        Drupal.geofieldMap.googleCallbacks = [];
+        _.invoke(self.googleCallbacks, 'callback');
+        self.googleCallbacks = [];
       });
     },
 
@@ -64,23 +66,25 @@
      * @param {geolocationCallback} callback - The callback
      */
     addCallback:  function (callback) {
-      Drupal.geofieldMap.googleCallbacks = Drupal.geofieldMap.googleCallbacks || [];
-      Drupal.geofieldMap.googleCallbacks.push({callback: callback});
+      var self = this;
+      self.googleCallbacks = self.googleCallbacks || [];
+      self.googleCallbacks.push({callback: callback});
     },
 
     // Lead Google Maps library.
     loadGoogle: function (mapid, callback) {
+      var self = this;
 
       // Add the callback.
-      Drupal.geofieldMap.addCallback(callback);
+      self.addCallback(callback);
 
       // Check for google maps.
       if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        if (Drupal.geofieldMap.maps_api_loading === true) {
+        if (self.maps_api_loading === true) {
           return;
         }
 
-        Drupal.geofieldMap.maps_api_loading = true;
+        self.maps_api_loading = true;
         // Google maps isn't loaded so lazy load google maps.
 
         // Default script path.
@@ -93,14 +97,14 @@
 
         $.getScript(scriptPath)
           .done(function () {
-            Drupal.geofieldMap.maps_api_loading = false;
-            Drupal.geofieldMap.googleCallback();
+            self.maps_api_loading = false;
+            self.googleCallback();
           });
 
       }
       else {
         // Google maps loaded. Run callback.
-        Drupal.geofieldMap.googleCallback();
+        self.geofieldGmap.googleCallback();
       }
     },
 
