@@ -29,7 +29,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
    *
    * @var \Drupal\Core\Config\ImmutableConfig
    */
-  private $geofieldGmapConfig;
+  private $config;
 
   /**
    * Lat Lon widget components.
@@ -59,7 +59,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
   ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->stringTranslation = $string_translation;
-    $this->geofieldGmapConfig = $config->get('geofield_gmap.settings');
+    $this->config = $config->get('geofield_gmap.settings');
   }
 
   /**
@@ -185,7 +185,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#click_to_find_marker' => $this->getSetting('click_to_find_marker'),
       '#click_to_place_marker' => $this->getSetting('click_to_place_marker'),
       '#error_label' => !empty($element['#title']) ? $element['#title'] : $this->fieldDefinition->getLabel(),
-      '#gmap_api_key' => $this->geofieldGmapConfig->get('gmap_api_key'),
+      '#gmap_api_key' => $this->config->get('gmap_api_key'),
     );
 
     return array('value' => $element);
