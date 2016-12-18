@@ -9,7 +9,7 @@
       if (drupalSettings['geofield_gmap']) {
         $.each(drupalSettings['geofield_gmap'], function(mapid, options) {
           // First load the library from google.
-          Drupal.geofieldMap.loadGoogle(function () {
+          Drupal.geofieldMap.loadGoogle(mapid, function () {
             //Then initialize it with the Geofield Gmap Settings.
             Drupal.geofieldMap.map_initialize({
               lat: options.lat,
@@ -26,11 +26,11 @@
               click_to_place_marker_id: options.click_to_place_marker_id,
               click_to_place_marker: options.click_to_place_marker
             });
+
           });
         });
 
       }
-
     }
   };
 
@@ -44,8 +44,35 @@
     // This flag will prevent repeat $.getScript() calls.
     maps_api_loading: false,
 
+    /**
+     * Provides the callback that is called when maps loads.
+     */
+    googleCallback: function () {
+      // Ensure callbacks array;
+      Drupal.geofieldMap.googleCallbacks = Drupal.geofieldMap.googleCallbacks || [];
+
+      // Wait until the window load event to try to use the maps library.
+      $(document).ready(function (e) {
+        _.invoke(Drupal.geofieldMap.googleCallbacks, 'callback');
+        Drupal.geofieldMap.googleCallbacks = [];
+      });
+    },
+
+    /**
+     * Adds a callback that will be called once the maps library is loaded.
+     *
+     * @param {geolocationCallback} callback - The callback
+     */
+    addCallback:  function (callback) {
+      Drupal.geofieldMap.googleCallbacks = Drupal.geofieldMap.googleCallbacks || [];
+      Drupal.geofieldMap.googleCallbacks.push({callback: callback});
+    },
+
     // Lead Google Maps library.
-    loadGoogle: function () {
+    loadGoogle: function (mapid, callback) {
+
+      // Add the callback.
+      Drupal.geofieldMap.addCallback(callback);
 
       // Check for google maps.
       if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
@@ -60,19 +87,20 @@
         var scriptPath = '//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false';
 
         // If a Google API key is set, use it.
-        if (typeof drupalSettings['geofield_gmap']['gmap_api_key'] !== 'undefined') {
-          scriptPath += '&key=' + drupalSettings['geofield_gmap']['gmap_api_key'];
+        if (typeof drupalSettings['geofield_gmap'][mapid]['gmap_api_key'] !== 'undefined') {
+          scriptPath += '&key=' + drupalSettings['geofield_gmap'][mapid]['gmap_api_key'];
         }
 
         $.getScript(scriptPath)
           .done(function () {
             Drupal.geofieldMap.maps_api_loading = false;
+            Drupal.geofieldMap.googleCallback();
           });
 
       }
       else {
         // Google maps loaded. Run callback.
-        Drupal.geolocation.googleCallback();
+        Drupal.geofieldMap.googleCallback();
       }
     },
 
@@ -107,14 +135,14 @@
       }
     },
 
-    // On Update Marker Event.
+    // Geofields update.
     geofields_update: function (mapid, position) {
       var self = this;
       self.lat_lon_fields_update(mapid, position);
       self.reverse_geocode(mapid, position);
     },
 
-    // On Change Marker Event.
+    // Onchange of Geofields.
     geofield_onchange: function (mapid) {
       var self = this;
       var location = new google.maps.LatLng(
@@ -126,13 +154,14 @@
       self.reverse_geocode(mapid, location);
     },
 
+    // Coordinates update.
     lat_lon_fields_update: function (mapid, position) {
       var self = this;
       self.map_data[mapid].lat.val(position.lat().toFixed(6));
       self.map_data[mapid].lng.val(position.lng().toFixed(6));
     },
 
-    // Process a Reverse Geocode.
+    // Reverse geocode.
     reverse_geocode: function (mapid, position) {
       var self = this;
       self.geocoder.geocode({'latLng': position}, function (results, status) {

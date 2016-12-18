@@ -1,0 +1,6 @@
+# Define default links for this module.
+geofield_gmap.settings:
+  route_name: geofield_gmap.settings
+  title: 'GeoField Gmap settings'
+  parent: system.admin_config_services
+  description: 'GeoField Gmap settings'

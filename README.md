@@ -1,13 +1,13 @@
 # Drupal 8 Proposed porting of the [Geofield Gmap module](https://www.drupal.org/project/geofield_gmap)
 
 
-INTRODUCTION
+Introduction
 ------------
 
 Geofield Gmap module provides a Google Map widget for [Geofield Module](https://www.drupal.org/project/geofield).
 Represent the perfect option to input a Location / Geofield value to a content type, throughout an interactive Google Map widget.
 
-INSTALLATION AND USE
+Installation and use
 ---------------------
 
 1. Install the module the drupal way [1]

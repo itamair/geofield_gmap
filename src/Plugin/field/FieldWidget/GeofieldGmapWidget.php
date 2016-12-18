@@ -6,8 +6,10 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\geofield\Plugin\Field\FieldWidget\GeofieldLatLonWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Plugin implementation of the 'geofield_gmap' widget.
@@ -23,6 +25,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactoryPluginInterface {
 
   /**
+   * The Geofield Gmap Module Configurations.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  private $geofieldGmapConfig;
+
+  /**
    * Lat Lon widget components.
    *
    * @var array
@@ -33,14 +42,24 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
    * GeofieldMapWidget constructor.
    *
    * {@inheritdoc}
+   *
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
+   *   The Translation service.
+   * @param ConfigFactoryInterface config
+   *   The ConfigFactory object.
    */
   public function __construct(
     $plugin_id,
     $plugin_definition,
     FieldDefinitionInterface $field_definition,
     array $settings,
-    array $third_party_settings) {
+    array $third_party_settings,
+    TranslationInterface $string_translation,
+    ConfigFactoryInterface $config
+  ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+    $this->stringTranslation = $string_translation;
+    $this->geofieldGmapConfig = $config->get('geofield_gmap.settings');
   }
 
   /**
@@ -52,7 +71,9 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       $plugin_definition,
       $configuration['field_definition'],
       $configuration['settings'],
-      $configuration['third_party_settings']
+      $configuration['third_party_settings'],
+      $container->get('string_translation'),
+      $container->get('config.factory')
     );
   }
 
@@ -132,26 +153,11 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#markup' => $this->t('Click to place marker: @state', array('@state' => $this->getSetting('click_to_place_marker') ? t('enabled') : t('disabled'))),
     ];
 
-    $geoaddress_field_field = [
-      '#markup' => $this->t('Geoaddress Field: @state', array('@state' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->getSetting('geoaddress_field')['field'] : $this->t('- any -'))),
-    ];
-
-    $geoaddress_field_hidden = [
-      '#markup' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->t('Geoaddress Field Hidden: @state', array('@state' => $this->getSetting('geoaddress_field')['hidden'])) : '',
-    ];
-
-    $geoaddress_field_disabled = [
-      '#markup' => ('0' != $this->getSetting('geoaddress_field')['field']) ? $this->t('Geoaddress Field Disabled: @state', array('@state' => $this->getSetting('geoaddress_field')['disabled'])) : '',
-    ];
-
     $container = [
       'html5' => $html5,
       'map_zoom_level' => $map_zoom_level,
       'map_center' => $map_center,
       'marker_center' => $marker_center,
-      'field' => $geoaddress_field_field,
-      'hidden' => $geoaddress_field_hidden,
-      'disabled' => $geoaddress_field_disabled,
     ];
 
     return $container;
@@ -179,6 +185,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#click_to_find_marker' => $this->getSetting('click_to_find_marker'),
       '#click_to_place_marker' => $this->getSetting('click_to_place_marker'),
       '#error_label' => !empty($element['#title']) ? $element['#title'] : $this->fieldDefinition->getLabel(),
+      '#gmap_api_key' => $this->geofieldGmapConfig->get('gmap_api_key'),
     );
 
     return array('value' => $element);

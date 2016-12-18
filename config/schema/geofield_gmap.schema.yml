@@ -1,11 +1,7 @@
-geofield_gmap.config.yml:
+geofield_gmap.settings:
   type: config_object
-  label: 'Geofield Gmap Configuration'
+  label: 'Geofield Gmap Configurations'
   mapping:
-    defaults:
-      type: mapping
-      label: 'Defaults settings'
-      mapping:
-        gmap_api_key:
-          type: string
-          label: 'Google Maps API key'
+    gmap_api_key:
+      type: string
+      label: 'Google Maps API key'

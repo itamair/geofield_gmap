@@ -32,12 +32,12 @@ class GeofieldGmapSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = $this->config('geofield_gmap.config');
+    $config = $this->config('geofield_gmap.settings');
 
-    $form['geofield_gmap_api_key'] = array(
+    $form['gmap_api_key'] = array(
       '#type' => 'textfield',
       '#title' => $this->t("Google Api Key"),
-      '#default_value' => $config->get('defaults.gmap_api_key'),
+      '#default_value' => $config->get('gmap_api_key'),
     );
 
     return parent::buildForm($form, $form_state);
@@ -49,8 +49,8 @@ class GeofieldGmapSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     // Save the config values.
-    $this->config('geofield_gmap.config')
-      ->set('defaults.gmap_api_key', $form_state->getValue('geofield_gmap_api_key'))
+    $this->config('geofield_gmap.settings')
+      ->set('gmap_api_key', $form_state->getValue('gmap_api_key'))
       ->save();
 
     // Invalidate the cached library info, to allow this key to be included

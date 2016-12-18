@@ -1,4 +1,4 @@
-geofield_gmap.admin_settings:
+geofield_gmap.settings:
   path: 'admin/config/content/geofield_gmap'
   defaults:
     _form: '\Drupal\geofield_gmap\Form\GeofieldGmapSettingsForm'

@@ -61,7 +61,7 @@ class GeofieldGmap extends GeofieldElementBase {
   public static function latLonProcess(&$element, FormStateInterface $form_state, &$complete_form) {
 
     // Attach GMAP API.
-    $element['#attached']['library'][] = 'geofield_gmap/google_maps';
+    // $element['#attached']['library'][] = 'geofield_gmap/geofield_gmap.gmaps';
 
     $gmapid = 'gmap-' . $element['#id'];
 
@@ -121,7 +121,7 @@ class GeofieldGmap extends GeofieldElementBase {
     }
 
     if (!empty($element['#geolocation']) && $element['#geolocation'] == TRUE) {
-      $element['#attached']['library'][] = 'geofield_gmap/geolocation';
+      $element['#attached']['library'][] = 'geofield_gmap/geofield_gmap.geolocation';
       $element['gmap']['actions']['geolocation'] = array(
         '#type' => 'button',
         '#value' => t('Find my location'),
@@ -137,11 +137,12 @@ class GeofieldGmap extends GeofieldElementBase {
     $element['lon']['#attributes']['id'] = 'lon-' . $element['#id'];
 
     // Attach Geofield Gmap Library.
-    $element['#attached']['library'][] = 'geofield_gmap/geofield_gmap';
+    $element['#attached']['library'][] = 'geofield_gmap/geofield_gmap.main';
 
     $settings = [
       $gmapid => [
         'id' => $element['#id'],
+        'gmap_api_key' => $element['#gmap_api_key'] ? $element['#gmap_api_key'] : '',
         'name' => $element['#name'],
         'lat' => floatval($element['lat']['#default_value']),
         'lng' => floatval($element['lon']['#default_value']),
@@ -152,9 +153,9 @@ class GeofieldGmap extends GeofieldElementBase {
         'mapid' => $gmapid,
         'widget' => TRUE,
         'map_type' => $element['#map_type'],
-        'click_to_find_marker_id' => $element['#click_to_find_marker'] ? $element['map']['actions']['click_to_find_marker']['#attributes']['id'] : NULL,
+        'click_to_find_marker_id' => $element['#click_to_find_marker'] ? $element['gmap']['actions']['click_to_find_marker']['#attributes']['id'] : NULL,
         'click_to_find_marker' => $element['#click_to_find_marker'] ? TRUE : FALSE,
-        'click_to_place_marker_id' => $element['#click_to_place_marker'] ? $element['map']['actions']['click_to_place_marker']['#attributes']['id'] : NULL,
+        'click_to_place_marker_id' => $element['#click_to_place_marker'] ? $element['gmap']['actions']['click_to_place_marker']['#attributes']['id'] : NULL,
         'click_to_place_marker' => $element['#click_to_place_marker'] ? TRUE : FALSE,
       ],
     ];
