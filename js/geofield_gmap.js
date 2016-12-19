@@ -104,7 +104,7 @@
       }
       else {
         // Google maps loaded. Run callback.
-        self.geofieldGmap.googleCallback();
+        self.googleCallback();
       }
     },
 

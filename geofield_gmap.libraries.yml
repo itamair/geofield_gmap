@@ -1,12 +1,3 @@
-geofield_gmap.gmaps:
-  remote: "https://maps.googleapis.com/maps/api/js"
-  version: 1.x
-  license:
-    name: APACHE
-    gpl-compatible: true
-  js:
-    //maps.googleapis.com/maps/api/js: { type: external }
-
 geofield_gmap.main:
   version: 1.x
   css:
@@ -25,5 +16,3 @@ geofield_gmap.geolocation:
   version: 1.x
   js:
     js/geolocation.js: {}
-  dependencies:
-      - geofield_gmap/geofield_gmap.gmaps

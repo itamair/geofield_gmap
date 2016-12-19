@@ -60,9 +60,6 @@ class GeofieldGmap extends GeofieldElementBase {
    */
   public static function latLonProcess(&$element, FormStateInterface $form_state, &$complete_form) {
 
-    // Attach GMAP API.
-    // $element['#attached']['library'][] = 'geofield_gmap/geofield_gmap.gmaps';
-
     $gmapid = 'gmap-' . $element['#id'];
 
     $element['gmap'] = [

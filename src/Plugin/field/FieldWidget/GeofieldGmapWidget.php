@@ -9,7 +9,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Utility\LinkGeneratorInterface;
+use Drupal\Core\Url;
 
 /**
  * Plugin implementation of the 'geofield_gmap' widget.
@@ -25,11 +26,11 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactoryPluginInterface {
 
   /**
-   * The Geofield Gmap Module Configurations.
+   * The Link generator Service.
    *
-   * @var \Drupal\Core\Config\ImmutableConfig
+   * @var \Drupal\Core\Utility\LinkGeneratorInterface
    */
-  private $config;
+  protected $link;
 
   /**
    * Lat Lon widget components.
@@ -45,8 +46,8 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
    *
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The Translation service.
-   * @param ConfigFactoryInterface config
-   *   The ConfigFactory object.
+   * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
+   *   The Link Generator service.
    */
   public function __construct(
     $plugin_id,
@@ -55,11 +56,11 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
     array $settings,
     array $third_party_settings,
     TranslationInterface $string_translation,
-    ConfigFactoryInterface $config
+    LinkGeneratorInterface $link_generator
   ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->stringTranslation = $string_translation;
-    $this->config = $config->get('geofield_gmap.settings');
+    $this->link = $link_generator;
   }
 
   /**
@@ -73,7 +74,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       $configuration['settings'],
       $configuration['third_party_settings'],
       $container->get('string_translation'),
-      $container->get('config.factory')
+      $container->get('link_generator')
     );
   }
 
@@ -82,6 +83,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
    */
   public static function defaultSettings() {
     return array(
+      'map_google_api_key' => '',
       'map_type' => 'ROADMAP',
       'zoom_level' => 5,
       'click_to_find_marker' => FALSE,
@@ -96,6 +98,14 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
     $elements = parent::settingsForm($form, $form_state);
 
     $elements['#tree'] = TRUE;
+
+    $elements['map_google_api_key'] = [
+      '#type' => 'textfield',
+      '#title' => t('Gmap Api Key (@link)', array(
+        '@link' => $this->link->generate(t('Get a Key/Authentication for Google Maps Javascript Library'), Url::fromUri('https://developers.google.com/maps/documentation/javascript/get-api-key', array('absolute' => TRUE, 'attributes' => array('target' => 'blank')))),
+      )),
+      '#default_value' => $this->getSetting('map_google_api_key'),
+    ];
 
     $elements['map_type'] = array(
       '#type' => 'select',
@@ -141,6 +151,10 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#markup' => $this->t('HTML5 Geolocation button: @state', array('@state' => $this->getSetting('html5_geolocation') ? t('enabled') : t('disabled'))),
     ];
 
+    $map_google_apy_key = [
+      '#markup' => $this->t('Google Maps API Key: @state', array('@state' => $this->getSetting('map_google_api_key') ? $this->getSetting('map_google_api_key') : '')),
+    ];
+
     $map_zoom_level = [
       '#markup' => $this->t('Zoom Level: @state;', array('@state' => $this->getSetting('zoom_level'))),
     ];
@@ -155,6 +169,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
 
     $container = [
       'html5' => $html5,
+      'map_google_apy_key' => $map_google_apy_key,
       'map_zoom_level' => $map_zoom_level,
       'map_center' => $map_center,
       'marker_center' => $marker_center,
@@ -185,7 +200,7 @@ class GeofieldGmapWidget extends GeofieldLatLonWidget implements ContainerFactor
       '#click_to_find_marker' => $this->getSetting('click_to_find_marker'),
       '#click_to_place_marker' => $this->getSetting('click_to_place_marker'),
       '#error_label' => !empty($element['#title']) ? $element['#title'] : $this->fieldDefinition->getLabel(),
-      '#gmap_api_key' => $this->config->get('gmap_api_key'),
+      '#gmap_api_key' => $this->getSetting('map_google_api_key'),
     );
 
     return array('value' => $element);
